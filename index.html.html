@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Chat App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+        #chat-container {
+            width: 400px;
+            max-width: 100%;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .message {
+            margin: 10px 0;
+        }
+        .user {
+            text-align: right;
+            color: blue;
+        }
+        .assistant {
+            text-align: left;
+            color: green;
+        }
+    </style>
+</head>
+<body>
+    <div id="chat-container">
+        <h3>Chat with AI</h3>
+        <div id="chat-box"></div>
+        <select id="role">
+            <option value="user">User</option>
+            <option value="assistant">Assistant</option>
+        </select>
+        <input type="text" id="content" placeholder="Type your message...">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <script>
+        async function sendMessage() {
+            const role = document.getElementById("role").value;
+            const content = document.getElementById("content").value;
+            if (!content) return;
+            
+            const chatBox = document.getElementById("chat-box");
+            chatBox.innerHTML += `<div class='message ${role}'>${role}: ${content}</div>`;
+            
+            document.getElementById("content").value = "";
+            
+            const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer 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"
+                },
+                body: JSON.stringify({
+                    model: "deepseek/deepseek-r1:free",
+                    messages: [{ "role": role, "content": content }]
+                })
+            });
+            
+            const data = await response.json();
+            const reply = data.choices[0].message.content;
+            chatBox.innerHTML += `<div class='message assistant'>Assistant: ${reply}</div>`;
+        }
+    </script>
+</body>
+</html>
